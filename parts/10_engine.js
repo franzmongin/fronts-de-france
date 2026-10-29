@@ -25,6 +25,8 @@ function buildFX(){ if(FX){ for(const ps of FX.passes) ps.dispose?.(); FX.render
   FX.addPass(new RenderPass(scene,cam));
   const rt0=null; const ao=new GTAOPass(scene,cam,w,h); ao.output=GTAOPass.OUTPUT.Default; ao.blendIntensity=.85;
   ao.updateGtaoMaterial({radius:.9,distanceExponent:1.2,thickness:1.2,scale:1,samples:12}); ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});
+  // les sprites, points, lignes et objets transparents ne doivent pas noircir l'occlusion ambiante
+  ao._overrideVisibility=function(){ const cache=this._visibilityCache; this.scene.traverse(o=>{ if(o.visible&&(o.isPoints||o.isLine||o.isSprite||(o.material&&!Array.isArray(o.material)&&o.material.transparent))){ o.visible=false; cache.push(o); } }); };
   if(quality==="high"){ FX.addPass(ao); FX.ao=ao; } else ao.dispose();
   const bl=new UnrealBloomPass(new THREE.Vector2(w,h),.2,.5,.92); FX.addPass(bl);
   FX.addPass(new OutputPass()); }
