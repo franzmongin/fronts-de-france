@@ -1,0 +1,19 @@
+{
+  "name": "fronts-de-france",
+  "private": true,
+  "version": "3.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node tools/fetch-models.mjs && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5",
+    "@gltf-transform/core": "^4.1.0",
+    "@gltf-transform/functions": "^4.1.0"
+  }
+}

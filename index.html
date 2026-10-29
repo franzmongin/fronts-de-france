@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fronts de France</title>
+<meta name="description" content="Campagne FPS historique : cinq batailles de Vouillé (507) à la Normandie (1944).">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e1012'/%3E%3Cpath d='M9 6v20M9 7h14l-4 5 4 5H9' stroke='%23d9a441' stroke-width='2.5' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Barlow:wght@400;500;600&family=EB+Garamond:ital@0;1&display=swap">
+<style>
+/* Layout : écran de jeu plein cadre, interface militaire sobre ; ocre poussiéreux, rouge d'alerte, sous-titres en garamond pour les cinématiques */
+:root{
+  --bg:#0e1012; --panel:#171a1d; --glass:rgba(10,12,14,.68); --ink:#eef0f2; --muted:#a6adb5; --line:#2a2f35;
+  --ochre:#d9a441; --red:#e04a3a; --green:#74c48a; --gold:#e8c35a; --silver:#c9d0d6; --bronze:#c58a52;
+  --title:"Oswald","Arial Narrow",system-ui,sans-serif; --body:"Barlow",system-ui,sans-serif; --serif:"EB Garamond",Georgia,serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{width:100%;max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.narrow{max-width:780px}
+h1,h2,h3{font-family:var(--title);font-weight:700;margin:0;line-height:1.08;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+h1{font-size:clamp(2.3rem,7vw,3.8rem);color:var(--ochre)}
+h2{font-size:1.6rem;color:var(--ochre)} h3{font-size:1.05rem}
+p{margin:0}
+.kick{font-family:var(--title);font-size:.85rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:68ch}
+.camp{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;position:relative}
+@media (max-width:980px){.camp{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:540px){.camp{grid-template-columns:1fr}}
+.mis{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 12px 14px;display:flex;flex-direction:column;gap:5px;text-align:left;color:var(--ink);cursor:pointer;min-width:0}
+.mis:hover:not(:disabled){border-color:var(--ochre)}
+.mis:disabled{opacity:.45;cursor:default}
+.mis .art{height:70px;border-radius:7px;margin-bottom:4px}
+.mis .y{font-family:var(--title);font-size:1.45rem;color:var(--ochre);line-height:1}
+.mis b{font-family:var(--title);font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.mis span{font-size:.86rem;color:var(--muted)}
+.medal{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}
+.medal i{width:12px;height:12px;border-radius:50%;display:inline-block;background:var(--line)}
+.medal i.g{background:var(--gold)} .medal i.s{background:var(--silver)} .medal i.b{background:var(--bronze)}
+.keys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px;list-style:none;margin:0;padding:0;color:var(--muted);font-size:.93rem}
+@media (max-width:560px){.keys{grid-template-columns:1fr}}
+kbd{font-family:var(--body);font-weight:600;font-size:.78rem;background:var(--panel);border:1px solid var(--line);border-bottom-width:3px;border-radius:4px;padding:0 6px;color:var(--ink)}
+label{font-size:.9rem;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text]{flex:1 1 220px;min-width:0;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid transparent;padding:10px 18px;color:var(--ink);background:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.primary{background:var(--ochre);color:#1a1206;font-family:var(--title);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ghost{border-color:var(--line)}
+.hint{color:var(--muted);font-size:.92rem}
+.err{color:var(--red)}
+
+.game{position:relative;width:100%;aspect-ratio:16/9;max-height:86vh;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#000;user-select:none;-webkit-user-select:none;touch-action:none}
+@media (max-width:760px){.game{aspect-ratio:auto;height:min(80vh,660px)}}
+.game:fullscreen{max-height:none;border:0;border-radius:0}
+.game canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;inset:0;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.glass{background:var(--glass);border:1px solid rgba(255,255,255,.08);border-radius:8px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.cross{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;transition:transform .08s}
+.cross i{position:absolute;background:#fff;box-shadow:0 0 2px #000}
+.cross i:nth-child(1){left:12px;top:0;width:2px;height:8px}.cross i:nth-child(2){left:12px;bottom:0;width:2px;height:8px}
+.cross i:nth-child(3){top:12px;left:0;height:2px;width:8px}.cross i:nth-child(4){top:12px;right:0;height:2px;width:8px}
+.hitm{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;opacity:0;transition:opacity .15s}
+.hitm i{position:absolute;left:14px;top:-2px;width:2px;height:34px;background:#fff}
+.hitm i:nth-child(1){transform:rotate(45deg)} .hitm i:nth-child(2){transform:rotate(-45deg)}
+.hitm.kill i{background:var(--red)}
+.obj{position:absolute;left:10px;top:10px;padding:8px 12px;display:flex;flex-direction:column;gap:3px;max-width:min(420px,58%)}
+.obj .t{font-family:var(--title);letter-spacing:.12em;font-size:.72rem;color:var(--ochre);text-transform:uppercase}
+.obj .x{font-weight:600;line-height:1.25}
+.obj .d{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.obj .pb{height:6px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden;margin-top:3px}
+.obj .pb i{display:block;height:100%;width:0;background:var(--ochre)}
+.compass{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:min(420px,40%);height:26px;overflow:hidden;border-radius:6px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08)}
+.compass .s{position:absolute;top:0;height:100%;width:2px;background:rgba(255,255,255,.35)}
+.compass .l{position:absolute;top:3px;font-family:var(--title);font-size:.8rem;color:#fff;transform:translateX(-50%)}
+.compass .o{position:absolute;top:3px;width:12px;height:12px;margin-left:-6px;background:var(--ochre);transform:rotate(45deg);box-shadow:0 0 6px rgba(217,164,65,.9)}
+.compass:after{content:"";position:absolute;left:50%;top:0;width:2px;height:100%;background:var(--ochre)}
+.tr{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.tr span{padding:4px 10px;font-size:.85rem;font-variant-numeric:tabular-nums}
+.tr b{color:var(--ochre)}
+.feed{position:absolute;right:12px;top:118px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:.85rem}
+.feed span{background:rgba(0,0,0,.45);padding:2px 8px;border-radius:4px;animation:fade 3s forwards}
+@keyframes fade{0%,70%{opacity:1}100%{opacity:0}}
+.bl{position:absolute;left:12px;bottom:12px;width:min(270px,42%);display:flex;flex-direction:column;gap:4px}
+.bar{height:12px;border-radius:6px;background:rgba(0,0,0,.55);overflow:hidden;border:1px solid rgba(255,255,255,.15)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#c0392b,#e8a33a 50%,#74c48a);transition:width .15s}
+.bl small{font-family:var(--title);letter-spacing:.1em;font-size:.72rem;color:var(--muted)}
+.bl .ally{font-size:.8rem;color:var(--muted)}
+.br{position:absolute;right:12px;bottom:12px;text-align:right;padding:8px 12px}
+.br .w{font-family:var(--title);text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;color:var(--muted)}
+.br .a{font-family:var(--title);font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums}
+.br .a.low{color:var(--red)}
+.br .gr{font-size:.8rem;color:var(--muted)}
+.center{position:absolute;left:50%;top:28%;transform:translate(-50%,-50%);font-family:var(--title);font-size:clamp(1.3rem,4vw,2.3rem);text-transform:uppercase;letter-spacing:.06em;color:var(--ochre);text-shadow:0 2px 8px #000;text-align:center;max-width:90%}
+.center small{display:block;font-family:var(--body);text-transform:none;letter-spacing:0;font-size:.55em;color:#fff}
+.dmgdir{position:absolute;left:50%;top:50%;width:0;height:0}
+.dmgdir i{position:absolute;left:-60px;top:-170px;width:120px;height:30px;border-radius:50% 50% 0 0;border-top:6px solid rgba(224,60,40,.85);opacity:0;transition:opacity .5s;transform-origin:60px 170px}
+.vign{position:absolute;inset:0;box-shadow:inset 0 0 140px 50px rgba(190,20,10,0);transition:box-shadow .3s}
+.gwarn{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(224,74,58,.85);display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.toast{position:absolute;left:50%;top:48px;transform:translateX(-50%);width:min(580px,90%);padding:10px 14px}
+.toast b{display:block;font-family:var(--title);letter-spacing:.08em;font-size:.8rem;color:var(--ochre);text-transform:uppercase}
+.prompt{position:absolute;left:50%;bottom:24%;transform:translateX(-50%);padding:7px 14px;font-weight:600;white-space:nowrap}
+.lbox{position:absolute;left:0;right:0;height:11%;background:#000;transition:transform .5s}
+.lbox.t{top:0;transform:translateY(-100%)} .lbox.b{bottom:0;transform:translateY(100%)}
+.cine .lbox{transform:none}
+.sub{position:absolute;left:50%;bottom:13%;transform:translateX(-50%);width:min(820px,90%);text-align:center;font-family:var(--serif);font-size:clamp(1.05rem,2.3vw,1.45rem);line-height:1.35;text-shadow:0 2px 6px #000,0 0 2px #000}
+.sub b{display:block;font-family:var(--title);font-size:.68em;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre);font-weight:500;margin-bottom:2px}
+.skip{position:absolute;right:14px;bottom:3%;font-size:.78rem;color:rgba(255,255,255,.65)}
+.ov{position:absolute;inset:0;background:rgba(8,10,12,.9);display:flex;flex-direction:column;gap:12px;padding:22px 26px;overflow:auto;pointer-events:auto}
+.ov>:first-child{margin-top:auto}.ov>:last-child{margin-bottom:auto}
+.ov p{max-width:68ch}
+.ov .stats{display:flex;gap:22px;flex-wrap:wrap}
+.ov .stats div{display:flex;flex-direction:column}
+.ov .stats b{font-family:var(--title);font-size:1.7rem;color:var(--ochre);font-variant-numeric:tabular-nums}
+.ov .stats span{font-size:.82rem;color:var(--muted)}
+.ov ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;color:var(--muted);max-width:68ch}
+.ov li::before{content:"▪ ";color:var(--ochre)}
+.ov .med{font-family:var(--title);font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase}
+@media (max-width:760px){.ov{padding:14px 16px;gap:8px}.ov h2{font-size:1.3rem}.compass{width:46%}.obj{max-width:50%;font-size:.88rem}}
+.tb{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;pointer-events:auto}
+.tb button{padding:5px 9px;font-size:.74rem;background:var(--glass);border:1px solid rgba(255,255,255,.12)}
+.joy{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06)}
+.joy i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(217,164,65,.55)}
+.tbtn{position:absolute;right:12px;bottom:64px;display:grid;grid-template-columns:repeat(3,auto);gap:8px;pointer-events:auto;align-items:end}
+.tbtn button{width:56px;height:56px;border-radius:50%;background:rgba(15,18,20,.6);border:2px solid rgba(255,255,255,.25);font-size:.68rem;font-weight:600;padding:0;touch-action:none}
+.tbtn .fire{width:80px;height:80px;color:var(--red);border-color:rgba(224,74,58,.7);font-size:.85rem;grid-column:3;grid-row:1/3}
+.tbtn button.on{background:rgba(217,164,65,.3)}
+@media (pointer:fine){.tbtn{display:none}}
+.sep{display:flex;align-items:center;gap:12px;font-family:var(--title);text-transform:uppercase;letter-spacing:.1em;color:var(--ochre)}
+.sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--line)}
+.board{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.board li{display:grid;grid-template-columns:2.2em 1fr auto;gap:10px;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--line)}
+.board .rk{font-family:var(--title);color:var(--muted)}
+.board li:nth-child(-n+3) .rk{color:var(--ochre)}
+.board .nm{min-width:0;overflow-wrap:anywhere;font-weight:600}
+.board .nm small{display:block;font-weight:400;color:var(--muted);font-size:.84rem}
+.board .sc{font-family:var(--title);font-variant-numeric:tabular-nums}
+.board li.me{background:color-mix(in srgb,var(--ochre) 12%,transparent)}
+.empty{color:var(--muted);padding:6px 0}
+
+.loadbar{max-width:540px;display:flex;flex-direction:column;gap:6px}
+.loadbar .bar i{background:var(--ochre)}
+.credit{color:var(--muted);font-size:.8rem}
+.credit a{color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section id="home" class="wrap">
+    <div class="wrap narrow" style="margin:0;gap:10px">
+      <div class="kick">Campagne en vue subjective · 507 – 1944</div>
+      <h1>Fronts de France</h1>
+      <p class="lede">Cinq batailles, quinze siècles. À chaque époque ses armes, ses adversaires et ses chefs : Clovis à Vouillé, Philippe Auguste à Bouvines, Bayard à Marignan, Napoléon à Austerlitz, le commandant Kieffer en Normandie. Chaque mission enchaîne des objectifs : tenir un pont, protéger le roi, prendre un plateau, saboter un canon. Tes compagnons se battent à tes côtés.</p>
+    </div>
+    <div class="loadbar" id="loadBox"><small class="hint" id="loadTxt">Chargement des modèles 3D…</small><div class="bar"><i id="loadBar" style="width:0%"></i></div></div>
+    <div class="camp" id="camp"></div>
+    <form id="nameForm" class="row" style="max-width:540px">
+      <label for="pseudo" style="flex-basis:100%">Ton pseudo</label>
+      <input type="text" id="pseudo" maxlength="20" autocomplete="nickname" placeholder="ex. Bayard">
+    </form>
+    <ul class="keys">
+      <li><span>Clique dans l'écran pour capturer la souris · <kbd>Échap</kbd> pause</span></li>
+      <li><span><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> se déplacer · <kbd>Maj</kbd> courir · <kbd>C</kbd> s'accroupir · <kbd>Espace</kbd> sauter</span></li>
+      <li><span>Clic gauche tirer · clic droit viser · <kbd>R</kbd> recharger</span></li>
+      <li><span><kbd>F</kbd> corps à corps · <kbd>E</kbd> agir · <kbd>G</kbd> grenade (1944)</span></li>
+      <li><span>Téléphone : joystick à gauche, glisser à droite pour viser, boutons à droite</span></li>
+      <li><span>Les armes anciennes rechargent lentement : bats-toi depuis un couvert</span></li>
+    </ul>
+    <p class="err" id="loadErr" hidden>Le moteur 3D n'a pas pu se charger. Recharge la page ; ton navigateur doit prendre en charge WebGL.</p>
+  </section>
+
+  <section id="play" class="wrap" hidden>
+    <div class="game" id="game">
+      <div class="hud" id="hud">
+        <div class="vign" id="vign"></div>
+        <div class="dmgdir" id="dmgdir"><i></i><i></i><i></i></div>
+        <div class="cross" id="cross"><i></i><i></i><i></i><i></i></div>
+        <div class="hitm" id="hitm"><i></i><i></i></div>
+        <div id="gwarns"></div>
+        <div class="compass" id="compass"></div>
+        <div class="obj glass" id="obj"><span class="t" id="objT"></span><span class="x" id="objX"></span><span class="d" id="objD"></span><div class="pb" id="objPB" hidden><i id="objPI"></i></div></div>
+        <div class="tr"><span class="glass">Score <b id="sScore">0</b></span><span class="glass">Ennemis <b id="sKills">0</b></span><span class="glass">Parchemins <b id="sPar">0/3</b></span></div>
+        <div class="feed" id="feed"></div>
+        <div class="bl"><small>SANTÉ</small><div class="bar"><i id="hp" style="width:100%"></i></div><span class="ally" id="ally"></span></div>
+        <div class="br glass"><div class="w" id="wName"></div><div class="a" id="wAmmo"></div><div class="gr" id="wGr"></div></div>
+        <div class="prompt glass" id="prompt" hidden></div>
+        <div class="center" id="center" hidden></div>
+        <div class="toast glass" id="toast" hidden><b id="tT"></b><span id="tX"></span></div>
+        <div class="joy" id="joy" hidden><i id="joyK"></i></div>
+        <div class="tbtn" id="tbtn"><button type="button" data-b="ads">Viser</button><button type="button" data-b="reload">Rech.</button><button type="button" class="fire" data-b="fire">TIR</button><button type="button" data-b="jump">Saut</button><button type="button" data-b="melee">Mêlée</button><button type="button" data-b="act">Agir</button><button type="button" data-b="crouch">Accr.</button><button type="button" data-b="gren" id="tGren">Gren.</button></div>
+        <div class="tb"><button type="button" id="qBtn">Qualité</button><button type="button" id="fsBtn">Plein écran</button></div>
+        <div class="lbox t"></div><div class="lbox b"></div>
+        <div class="sub" id="sub" hidden><b id="subW"></b><span id="subX"></span></div>
+        <div class="skip" id="skip" hidden>Clic, Espace ou toucher : passer</div>
+        <div class="ov" id="ov" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap narrow" style="margin:0 auto;gap:10px">
+    <div class="sep">Tes records</div>
+    <ol class="board" id="board"></ol>
+    <p class="empty" id="boardEmpty">Aucun record pour l'instant. Termine une mission pour inscrire ton score. Les records sont gardés dans ce navigateur.</p>
+    <p class="hint" id="saveMsg"></p>
+    <p class="credit">Personnages : KayKit Character Packs par Kay Lousberg (CC0). Moteur : three.js.</p>
+  </section>
+</main>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
